@@ -85,6 +85,8 @@ int main(void)
     if (!glfwInit())
         return -1;
 
+    // Enable Anti Aliasing (via MSAA)
+    glfwWindowHint(GLFW_SAMPLES, 4);
     // Create a windowed mode window and its OpenGL context 
     window = glfwCreateWindow(1280, 720, "Program", NULL, NULL);
     if (!window)
@@ -95,6 +97,7 @@ int main(void)
 
     // Make the openGL context
     glfwMakeContextCurrent(window);
+    glEnable(GL_MULTISAMPLE);
 
     // Include the openGL functions using GLEW
     if (glewInit() != GLEW_OK) {
