@@ -104,10 +104,18 @@ int main(void)
         return -1;
     }
 
-    float vertexPositions[6] = {
-        -0.5f, -0.5f,
-         0.0f,  0.5f,
-         0.5f, -0.5f
+    float vertexPositions[] = {
+        -0.5f, -0.5f,   // 0
+         0.5f, -0.5f,   // 1
+         0.5f,  0.5f,   // 2
+        -0.5f,  0.5f    // 3
+    };
+
+    // Index Buffer Data
+    // Note for future: The type for indicies can be any UNSIGNED type (eg. char, short, unsigned int, etc.
+    unsigned int indicies[] = {
+        0, 1, 2,
+        2, 3, 0
     };
 
     // Create a vertex buffer
@@ -120,6 +128,12 @@ int main(void)
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, (const void*)0);
 
+    // Create an index buffer
+    unsigned int ibo;
+    glGenBuffers(1, &ibo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indicies), &indicies, GL_STATIC_DRAW);
+
     ShaderProgramSource source = ParseShader("res/shaders/basic.shader");
     unsigned int shader = CreateShader(source.VertexSource, source.FragmentSource);
     glUseProgram(shader);
@@ -130,7 +144,8 @@ int main(void)
         // Render here 
         glClear(GL_COLOR_BUFFER_BIT);
 
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        // Nullptr allowed since index buffer has already been bound
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 
         // Swap front and back buffers
         glfwSwapBuffers(window);
