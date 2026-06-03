@@ -86,9 +86,9 @@ int main(void)
         return -1;
 
     // Enable Anti Aliasing (via MSAA)
-    glfwWindowHint(GLFW_SAMPLES, 4);
+    glfwWindowHint(GLFW_SAMPLES, 8);
     // Create a windowed mode window and its OpenGL context 
-    window = glfwCreateWindow(1280, 720, "Program", NULL, NULL);
+    window = glfwCreateWindow(720, 720, "Program", NULL, NULL);
     if (!window)
     {
         glfwTerminate();
@@ -118,11 +118,45 @@ int main(void)
         2, 3, 0
     };
 
+    // Circling
+    unsigned int circleRadius = 0.5;
+    float circleCentreX = 0.0;
+    float circleCentreY = 0.0;
+    const unsigned int numVerticiesPerCircle = 128;
+    const float PI = 3.141592;
+
+    // Plus one is for the centre and the two is for the two coordinates
+    float circleVertexPositions[2 * (numVerticiesPerCircle + 1)] = {
+        circleCentreX, circleCentreY
+    };
+    // 3 since there is a triangle for every vertex
+    unsigned int circleIndicies[3 * numVerticiesPerCircle];
+    const float anglePerVertex = (2 * PI) / (numVerticiesPerCircle);
+
+    for (int i = 0; i < numVerticiesPerCircle; i++) {
+        // Add the vertex at the correct x and y pos
+        circleVertexPositions[2 * (i + 1)] = (0.5 * cos(anglePerVertex * i));
+        circleVertexPositions[2 * (i + 1) + 1] = (0.5 * sin(anglePerVertex * i));
+
+        // Multiply by three since there are three numbers per index
+        circleIndicies[3 * i] = 0;
+        circleIndicies[(3 * i) + 1] = i + 1;
+        if (i != numVerticiesPerCircle - 1) {
+            circleIndicies[(3 * i) + 2] = i + 2;
+        }
+        // Else condition necessary for wrapping the cirle back around
+        else {
+            circleIndicies[(3 * i) + 2] = 1;
+        }
+
+    }
+
+
     // Create a vertex buffer
     unsigned int bufferId;
     glGenBuffers(1, &bufferId);
     glBindBuffer(GL_ARRAY_BUFFER, bufferId);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertexPositions), &vertexPositions, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(circleVertexPositions), &circleVertexPositions, GL_STATIC_DRAW);
 
     // Define and enable the vertex attributes
     glEnableVertexAttribArray(0);
@@ -132,7 +166,7 @@ int main(void)
     unsigned int ibo;
     glGenBuffers(1, &ibo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indicies), &indicies, GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(circleIndicies), &circleIndicies, GL_STATIC_DRAW);
 
     ShaderProgramSource source = ParseShader("res/shaders/basic.shader");
     unsigned int shader = CreateShader(source.VertexSource, source.FragmentSource);
@@ -145,7 +179,7 @@ int main(void)
         glClear(GL_COLOR_BUFFER_BIT);
 
         // Nullptr allowed since index buffer has already been bound
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+        glDrawElements(GL_TRIANGLES, numVerticiesPerCircle * 3, GL_UNSIGNED_INT, nullptr);
 
         // Swap front and back buffers
         glfwSwapBuffers(window);
