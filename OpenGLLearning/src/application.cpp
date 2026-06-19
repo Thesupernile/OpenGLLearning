@@ -170,6 +170,10 @@ int main(void)
 
     }
 
+    unsigned int vao;
+    GLCall(glGenVertexArrays(1, &vao));
+    GLCall(glBindVertexArray(vao));
+
 
     // Create a vertex buffer
     unsigned int bufferId;
@@ -203,7 +207,12 @@ int main(void)
         GLCall(glClear(GL_COLOR_BUFFER_BIT));
 
         // Change colour
+        GLCall(glUseProgram(shader));
         GLCall(glUniform4f(location, r, 0.6, 0.0, 1.0));
+
+        GLCall(glBindVertexArray(vao));
+        GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo));
+
 
         // Nullptr allowed since index buffer has already been bound
         GLCall(glDrawElements(GL_TRIANGLES, numVerticiesPerCircle * 3, GL_UNSIGNED_INT, nullptr));
