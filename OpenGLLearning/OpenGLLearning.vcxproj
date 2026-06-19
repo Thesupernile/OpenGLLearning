@@ -138,7 +138,6 @@
     <ClCompile Include="src\application.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="res\shaders\circle.shader" />
     <None Include="res\shaders\basic.shader" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

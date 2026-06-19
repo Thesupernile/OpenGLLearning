@@ -21,6 +21,5 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="res\shaders\basic.shader" />
-    <None Include="res\shaders\circle.shader" />
   </ItemGroup>
 </Project>
