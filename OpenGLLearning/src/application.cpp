@@ -5,23 +5,10 @@
 #include <string>
 #include <sstream>
 
-#define ASSERT(x) if (!(x)) __debugbreak();
-#define GLCall(x) GLClearError();\
-    x;\
-    ASSERT(GLLogCall(#x, __FILE__, __LINE__))
+#include "Renderer.h"
 
-static void GLClearError() {
-    while (glGetError() != GL_NO_ERROR);
-}
-
-static bool GLLogCall(const char* function, const char* file, int line) {
-    // Self Note: This works until error is zero (therefore until all errors are cleared)
-    while (GLenum error = glGetError()) {
-        std::cout << "[OpenGL Error] Error Code: " << error << "\nFunction: " << function << " \nLine: " << line << " \nFile: " << file << std::endl;
-        return false;
-    }
-    return true;
-}
+#include "VertexBuffer.h"
+#include "IndexBuffer.h"
 
 struct ShaderProgramSource {
     std::string VertexSource;
@@ -106,7 +93,7 @@ int main(void)
     // Enable Anti Aliasing (via MSAA)
     glfwWindowHint(GLFW_SAMPLES, 8);
     // Create a windowed mode window and its OpenGL context 
-    window = glfwCreateWindow(1600, 1600, "Program", NULL, NULL);
+    window = glfwCreateWindow(720, 720, "Program", NULL, NULL);
     if (!window)
     {
         glfwTerminate();
@@ -122,117 +109,110 @@ int main(void)
     if (glewInit() != GLEW_OK) {
         return -1;
     }
-
-    float vertexPositions[] = {
-        -0.5f, -0.5f,   // 0
-         0.5f, -0.5f,   // 1
-         0.5f,  0.5f,   // 2
-        -0.5f,  0.5f    // 3
-    };
-
-    // Index Buffer Data
-    // Note for future: The type for indicies can be any UNSIGNED type (eg. char, short, unsigned int, etc.
-    unsigned int indicies[] = {
-        0, 1, 2,
-        2, 3, 0
-    };
-
-    // Circling
-    unsigned int circleRadius = 0.5;
-    float circleCentreX = 0.0;
-    float circleCentreY = 0.0;
-    const unsigned int numVerticiesPerCircle = 128;
-    const float PI = 3.141592;
-
-    // Plus one is for the centre and the two is for the two coordinates
-    float circleVertexPositions[2 * (numVerticiesPerCircle + 1)] = {
-        circleCentreX, circleCentreY
-    };
-    // 3 since there is a triangle for every vertex
-    unsigned int circleIndicies[3 * numVerticiesPerCircle];
-    const float anglePerVertex = (2 * PI) / (numVerticiesPerCircle);
-
-    for (int i = 0; i < numVerticiesPerCircle; i++) {
-        // Add the vertex at the correct x and y pos
-        circleVertexPositions[2 * (i + 1)] = (0.5 * cos(anglePerVertex * i));
-        circleVertexPositions[2 * (i + 1) + 1] = (0.5 * sin(anglePerVertex * i));
-
-        // Multiply by three since there are three numbers per index
-        circleIndicies[3 * i] = 0;
-        circleIndicies[(3 * i) + 1] = i + 1;
-        if (i != numVerticiesPerCircle - 1) {
-            circleIndicies[(3 * i) + 2] = i + 2;
-        }
-        // Else condition necessary for wrapping the cirle back around
-        else {
-            circleIndicies[(3 * i) + 2] = 1;
-        }
-
-    }
-
-    unsigned int vao;
-    GLCall(glGenVertexArrays(1, &vao));
-    GLCall(glBindVertexArray(vao));
-
-
-    // Create a vertex buffer
-    unsigned int bufferId;
-    GLCall(glGenBuffers(1, &bufferId));
-    GLCall(glBindBuffer(GL_ARRAY_BUFFER, bufferId));
-    GLCall(glBufferData(GL_ARRAY_BUFFER, sizeof(circleVertexPositions), &circleVertexPositions, GL_STATIC_DRAW));
-
-    // Define and enable the vertex attributes
-    GLCall(glEnableVertexAttribArray(0));
-    GLCall(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, (const void*)0));
-
-    // Create an index buffer
-    unsigned int ibo;
-    GLCall(glGenBuffers(1, &ibo));
-    GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo));
-    GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(circleIndicies), &circleIndicies, GL_STATIC_DRAW));
-
-    ShaderProgramSource source = ParseShader("res/shaders/basic.shader");
-    unsigned int shader = CreateShader(source.VertexSource, source.FragmentSource);
-    GLCall(glUseProgram(shader));
-
-    GLCall(int location = glGetUniformLocation(shader, "u_Colour"));
-    GLCall(glUniform4f(location, 1.0, 0.6, 0.0, 1.0));
-
-    float r = 0.0f;
-    float increment = 0.05f;
-    // Loop until the user closes the window
-    while (!glfwWindowShouldClose(window))
     {
-        // Render here 
-        GLCall(glClear(GL_COLOR_BUFFER_BIT));
+        float vertexPositions[] = {
+            -0.5f, -0.5f,   // 0
+             0.5f, -0.5f,   // 1
+             0.5f,  0.5f,   // 2
+            -0.5f,  0.5f    // 3
+        };
 
-        // Change colour
-        GLCall(glUseProgram(shader));
-        GLCall(glUniform4f(location, r, 0.6, 0.0, 1.0));
+        // Index Buffer Data
+        // Note for future: The type for indicies can be any UNSIGNED type (eg. char, short, unsigned int, etc.
+        unsigned int indicies[] = {
+            0, 1, 2,
+            2, 3, 0
+        };
 
+        // Circling
+        unsigned int circleRadius = 0.5;
+        float circleCentreX = 0.0;
+        float circleCentreY = 0.0;
+        const unsigned int numVerticiesPerCircle = 128;
+        const float PI = 3.141592;
+
+        // Plus one is for the centre and the two is for the two coordinates
+        float circleVertexPositions[2 * (numVerticiesPerCircle + 1)] = {
+            circleCentreX, circleCentreY
+        };
+        // 3 since there is a triangle for every vertex
+        unsigned int circleIndicies[3 * numVerticiesPerCircle];
+        const float anglePerVertex = (2 * PI) / (numVerticiesPerCircle);
+
+        for (int i = 0; i < numVerticiesPerCircle; i++) {
+            // Add the vertex at the correct x and y pos
+            circleVertexPositions[2 * (i + 1)] = (0.5 * cos(anglePerVertex * i));
+            circleVertexPositions[2 * (i + 1) + 1] = (0.5 * sin(anglePerVertex * i));
+
+            // Multiply by three since there are three numbers per index
+            circleIndicies[3 * i] = 0;
+            circleIndicies[(3 * i) + 1] = i + 1;
+            if (i != numVerticiesPerCircle - 1) {
+                circleIndicies[(3 * i) + 2] = i + 2;
+            }
+            // Else condition necessary for wrapping the cirle back around
+            else {
+                circleIndicies[(3 * i) + 2] = 1;
+            }
+
+        }
+
+        unsigned int vao;
+        GLCall(glGenVertexArrays(1, &vao));
         GLCall(glBindVertexArray(vao));
-        GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo));
 
+        // Create a vertex buffer
+        VertexBuffer vb(circleVertexPositions, sizeof(circleVertexPositions));
 
-        // Nullptr allowed since index buffer has already been bound
-        GLCall(glDrawElements(GL_TRIANGLES, numVerticiesPerCircle * 3, GL_UNSIGNED_INT, nullptr));
+        // Define and enable the vertex attributes
+        GLCall(glEnableVertexAttribArray(0));
+        GLCall(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, (const void*)0));
 
-        if (r > 1.0f) {
-            increment = -0.05f;
+        // Create an index buffer
+        IndexBuffer ib(circleIndicies, sizeof(circleIndicies) / sizeof(circleIndicies[0]));
+
+        ShaderProgramSource source = ParseShader("res/shaders/basic.shader");
+        unsigned int shader = CreateShader(source.VertexSource, source.FragmentSource);
+        GLCall(glUseProgram(shader));
+
+        GLCall(int location = glGetUniformLocation(shader, "u_Colour"));
+        GLCall(glUniform4f(location, 1.0, 0.6, 0.0, 1.0));
+
+        float r = 0.0f;
+        float increment = 0.05f;
+        // Loop until the user closes the window
+        while (!glfwWindowShouldClose(window))
+        {
+            // Render here 
+            GLCall(glClear(GL_COLOR_BUFFER_BIT));
+
+            // Change colour
+            GLCall(glUseProgram(shader));
+            GLCall(glUniform4f(location, r, 0.6, 0.0, 1.0));
+
+            GLCall(glBindVertexArray(vao));
+            ib.Bind();
+
+            // Nullptr allowed since index buffer has already been bound
+            GLCall(glDrawElements(GL_TRIANGLES, numVerticiesPerCircle * 3, GL_UNSIGNED_INT, nullptr));
+
+            if (r > 1.0f) {
+                increment = -0.05f;
+            }
+            else if (r < 0.0f) {
+                increment = 0.05f;
+            }
+            r += increment;
+
+            // Swap front and back buffers
+            glfwSwapBuffers(window);
+
+            // Poll for and process events
+            glfwPollEvents();
         }
-        else if (r < 0.0f) {
-            increment = 0.05f;
-        }
-        r += increment;
 
-        // Swap front and back buffers
-        glfwSwapBuffers(window);
-
-        // Poll for and process events
-        glfwPollEvents();
+        glDeleteProgram(shader);
     }
-
-    glDeleteProgram(shader);
 
     glfwTerminate();
     return 0;
