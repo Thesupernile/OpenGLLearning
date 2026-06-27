@@ -8,6 +8,7 @@
 #include "Renderer.h"
 
 #include "VertexBuffer.h"
+#include "VertexBufferLayout.h"
 #include "IndexBuffer.h"
 #include "VertexArray.h"
 #include "Shader.h"
@@ -103,23 +104,21 @@ int main(void)
         shader.Bind();
         shader.SetUniform4f("u_Colour", 1.0f, 0.6f, 0.0f, 1.0f);
 
+        Renderer renderer;
+
         float r = 0.0f;
         float increment = 0.05f;
         // Loop until the user closes the window
         while (!glfwWindowShouldClose(window))
         {
             // Render here 
-            GLCall(glClear(GL_COLOR_BUFFER_BIT));
+            renderer.Clear();
 
             // Change colour
             shader.Bind();
             shader.SetUniform4f("u_Colour", r, 0.6f, 0.0f, 1.0f);
 
-            va.Bind();
-            ib.Bind();
-
-            // Nullptr allowed since index buffer has already been bound
-            GLCall(glDrawElements(GL_TRIANGLES, numVerticiesPerCircle * 3, GL_UNSIGNED_INT, nullptr));
+            renderer.Draw(va, ib, shader);
 
             if (r > 1.0f) {
                 increment = -0.05f;
