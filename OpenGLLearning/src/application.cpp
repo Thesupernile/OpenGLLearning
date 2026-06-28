@@ -12,6 +12,7 @@
 #include "IndexBuffer.h"
 #include "VertexArray.h"
 #include "Shader.h"
+#include "Texture.h"
 
 int main(void)
 {
@@ -56,15 +57,15 @@ int main(void)
         };
 
         // Circling
-        unsigned int circleRadius = 0.5;
+        float circleRadius = 0.5;
         float circleCentreX = 0.0;
         float circleCentreY = 0.0;
         const unsigned int numVerticiesPerCircle = 128;
         const float PI = 3.141592;
 
         // Plus one is for the centre and the two is for the two coordinates
-        float circleVertexPositions[2 * (numVerticiesPerCircle + 1)] = {
-            circleCentreX, circleCentreY
+        float circleVertexPositions[4 * (numVerticiesPerCircle + 1)] = {
+            circleCentreX, circleCentreY, 0.5, 0.5
         };
         // 3 since there is a triangle for every vertex
         unsigned int circleIndicies[3 * numVerticiesPerCircle];
@@ -72,8 +73,12 @@ int main(void)
 
         for (int i = 0; i < numVerticiesPerCircle; i++) {
             // Add the vertex at the correct x and y pos
-            circleVertexPositions[2 * (i + 1)] = (0.5 * cos(anglePerVertex * i));
-            circleVertexPositions[2 * (i + 1) + 1] = (0.5 * sin(anglePerVertex * i));
+            circleVertexPositions[4 * (i + 1)] = (circleRadius * cos(anglePerVertex * i));
+            circleVertexPositions[4 * (i + 1) + 1] = (circleRadius * sin(anglePerVertex * i));
+
+            // Add the texture coordinates (+ 1 then / 2 is to convert the range -1 to 1 to 0 to 1)
+            circleVertexPositions[4 * (i + 1) + 2] = ((cos(anglePerVertex * i) + 1) / 2);
+            circleVertexPositions[4 * (i + 1) + 3] = ((sin(anglePerVertex * i) + 1) / 2);
 
             // Multiply by three since there are three numbers per index
             circleIndicies[3 * i] = 0;
@@ -88,12 +93,16 @@ int main(void)
 
         }
 
+        GLCall(glEnable(GL_BLEND));
+        GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+
         VertexArray va;
 
         // Create a vertex buffer
         VertexBuffer vb(circleVertexPositions, sizeof(circleVertexPositions));
 
         VertexBufferLayout layout;
+        layout.Push<float>(2);
         layout.Push<float>(2);
         va.AddBuffer(vb, layout);
 
@@ -103,6 +112,10 @@ int main(void)
         Shader shader("res/shaders/basic.shader");
         shader.Bind();
         shader.SetUniform4f("u_Colour", 1.0f, 0.6f, 0.0f, 1.0f);
+
+        Texture texture("res/textures/AshensignNegative.png");
+        texture.Bind(0);
+        shader.SetUniform1i("u_Texture", 0);
 
         Renderer renderer;
 
