@@ -14,8 +14,18 @@
 #include "Shader.h"
 #include "Texture.h"
 
+#include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
+
 int main(void)
 {
+    const float WINDOW_ASPECT_WIDTH = 16;
+    const float WINDOW_ASPECT_HEIGHT = 9;
+    const float WINDOW_SCALE_FACTOR = 4;
+
+    const float WINDOW_WIDTH = 1280;
+    const float WINDOW_HEIGHT = (WINDOW_WIDTH / WINDOW_ASPECT_WIDTH) * WINDOW_ASPECT_HEIGHT;
+
     GLFWwindow* window;
 
     // Initialize glfw 
@@ -25,7 +35,7 @@ int main(void)
     // Enable Anti Aliasing (via MSAA)
     glfwWindowHint(GLFW_SAMPLES, 8);
     // Create a windowed mode window and its OpenGL context 
-    window = glfwCreateWindow(720, 720, "Program", NULL, NULL);
+    window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Program", NULL, NULL);
     if (!window)
     {
         glfwTerminate();
@@ -109,11 +119,15 @@ int main(void)
         // Create an index buffer
         IndexBuffer ib(circleIndicies, sizeof(circleIndicies) / sizeof(circleIndicies[0]));
 
+        // Create projection matrix
+        glm::mat4 proj = glm::ortho(-WINDOW_ASPECT_WIDTH/WINDOW_SCALE_FACTOR, WINDOW_ASPECT_WIDTH/WINDOW_SCALE_FACTOR, -WINDOW_ASPECT_HEIGHT/WINDOW_SCALE_FACTOR, WINDOW_ASPECT_HEIGHT/WINDOW_SCALE_FACTOR, -1.0f, 1.0f);
+
         Shader shader("res/shaders/basic.shader");
         shader.Bind();
         shader.SetUniform4f("u_Colour", 1.0f, 0.6f, 0.0f, 1.0f);
+        shader.SetUniformMat4f("u_MVP", proj);
 
-        Texture texture("res/textures/Ashensign.png");
+        Texture texture("res/textures/AshensignWithBackground.png");
         texture.Bind(0);
         shader.SetUniform1i("u_Texture", 0);
 
