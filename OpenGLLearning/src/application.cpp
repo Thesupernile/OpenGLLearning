@@ -57,7 +57,7 @@ int main(void)
         };
 
         // Circling
-        float circleRadius = 0.5;
+        float circleRadius = 0.7;
         float circleCentreX = 0.0;
         float circleCentreY = 0.0;
         const unsigned int numVerticiesPerCircle = 128;
@@ -113,7 +113,7 @@ int main(void)
         shader.Bind();
         shader.SetUniform4f("u_Colour", 1.0f, 0.6f, 0.0f, 1.0f);
 
-        Texture texture("res/textures/AshensignNegative.png");
+        Texture texture("res/textures/Ashensign.png");
         texture.Bind(0);
         shader.SetUniform1i("u_Texture", 0);
 
@@ -130,7 +130,12 @@ int main(void)
             // Change colour
             shader.Bind();
             shader.SetUniform4f("u_Colour", r, 0.6f, 0.0f, 1.0f);
+            texture.Unbind();
 
+            renderer.Draw(va, ib, shader);
+
+            shader.SetUniform4f("u_Colour", 0.0f, 0.0f, 0.0f, 0.0f);
+            texture.Bind(0);
             renderer.Draw(va, ib, shader);
 
             if (r > 1.0f) {
