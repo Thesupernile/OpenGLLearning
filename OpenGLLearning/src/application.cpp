@@ -65,9 +65,9 @@ int main(void)
         };
 
         // Circling
-        float circleRadius = 600;
-        float circleCentreX = 0.0;
-        float circleCentreY = 0.0;
+        float circleRadius = 200;
+        float circleCentreX = WINDOW_WIDTH/2;
+        float circleCentreY = WINDOW_HEIGHT/2;
         const unsigned int numVerticiesPerCircle = 128;
         const float PI = 3.141592;
 
@@ -81,8 +81,8 @@ int main(void)
 
         for (int i = 0; i < numVerticiesPerCircle; i++) {
             // Add the vertex at the correct x and y pos
-            circleVertexPositions[4 * (i + 1)] = (circleRadius * cos(anglePerVertex * i));
-            circleVertexPositions[4 * (i + 1) + 1] = (circleRadius * sin(anglePerVertex * i));
+            circleVertexPositions[4 * (i + 1)] = (circleRadius * cos(anglePerVertex * i)) + circleCentreX;
+            circleVertexPositions[4 * (i + 1) + 1] = (circleRadius * sin(anglePerVertex * i)) + circleCentreY;
 
             // Add the texture coordinates (+ 1 then / 2 is to convert the range -1 to 1 to 0 to 1)
             circleVertexPositions[4 * (i + 1) + 2] = ((cos(anglePerVertex * i) + 1) / 2);
@@ -118,7 +118,7 @@ int main(void)
         IndexBuffer ib(circleIndicies, sizeof(circleIndicies) / sizeof(circleIndicies[0]));
 
         // Create projection matrix
-        glm::mat4 proj = glm::ortho(-WINDOW_WIDTH/WINDOW_SCALE_FACTOR, WINDOW_WIDTH/WINDOW_SCALE_FACTOR, -WINDOW_HEIGHT/WINDOW_SCALE_FACTOR, WINDOW_HEIGHT/WINDOW_SCALE_FACTOR, -1.0f, 1.0f);
+        glm::mat4 proj = glm::ortho(0.0f, WINDOW_WIDTH/WINDOW_SCALE_FACTOR, 0.0f, WINDOW_HEIGHT/WINDOW_SCALE_FACTOR, -1.0f, 1.0f);
 
         Shader shader("res/shaders/basic.shader");
         shader.Bind();
