@@ -19,12 +19,10 @@
 
 int main(void)
 {
-    const float WINDOW_ASPECT_WIDTH = 16;
-    const float WINDOW_ASPECT_HEIGHT = 9;
-    const float WINDOW_SCALE_FACTOR = 4;
+    const float WINDOW_SCALE_FACTOR = 1;
 
     const float WINDOW_WIDTH = 1280;
-    const float WINDOW_HEIGHT = (WINDOW_WIDTH / WINDOW_ASPECT_WIDTH) * WINDOW_ASPECT_HEIGHT;
+    const float WINDOW_HEIGHT = 720;
 
     GLFWwindow* window;
 
@@ -67,7 +65,7 @@ int main(void)
         };
 
         // Circling
-        float circleRadius = 0.7;
+        float circleRadius = 600;
         float circleCentreX = 0.0;
         float circleCentreY = 0.0;
         const unsigned int numVerticiesPerCircle = 128;
@@ -120,7 +118,7 @@ int main(void)
         IndexBuffer ib(circleIndicies, sizeof(circleIndicies) / sizeof(circleIndicies[0]));
 
         // Create projection matrix
-        glm::mat4 proj = glm::ortho(-WINDOW_ASPECT_WIDTH/WINDOW_SCALE_FACTOR, WINDOW_ASPECT_WIDTH/WINDOW_SCALE_FACTOR, -WINDOW_ASPECT_HEIGHT/WINDOW_SCALE_FACTOR, WINDOW_ASPECT_HEIGHT/WINDOW_SCALE_FACTOR, -1.0f, 1.0f);
+        glm::mat4 proj = glm::ortho(-WINDOW_WIDTH/WINDOW_SCALE_FACTOR, WINDOW_WIDTH/WINDOW_SCALE_FACTOR, -WINDOW_HEIGHT/WINDOW_SCALE_FACTOR, WINDOW_HEIGHT/WINDOW_SCALE_FACTOR, -1.0f, 1.0f);
 
         Shader shader("res/shaders/basic.shader");
         shader.Bind();
@@ -134,7 +132,11 @@ int main(void)
         Renderer renderer;
 
         float r = 0.0f;
-        float increment = 0.05f;
+        float g = 0.5f;
+        float b = 0.2f;
+        float increment_r = 0.05f;
+        float increment_g = 0.07f;
+        float increment_b = 0.03f;
         // Loop until the user closes the window
         while (!glfwWindowShouldClose(window))
         {
@@ -142,23 +144,27 @@ int main(void)
             renderer.Clear();
 
             // Change colour
-            shader.Bind();
-            shader.SetUniform4f("u_Colour", r, 0.6f, 0.0f, 1.0f);
-            texture.Unbind();
-
-            renderer.Draw(va, ib, shader);
+            //texture.Unbind();
+            //shader.SetUniform4f("u_Colour", r, g, b, 1.0f);
+            //renderer.Draw(va, ib, shader);
 
             shader.SetUniform4f("u_Colour", 0.0f, 0.0f, 0.0f, 0.0f);
             texture.Bind(0);
             renderer.Draw(va, ib, shader);
 
-            if (r > 1.0f) {
-                increment = -0.05f;
+            // Colour changing code
+            if (r > 1.0f || r < 0.0f) {
+                increment_r = -increment_r;
             }
-            else if (r < 0.0f) {
-                increment = 0.05f;
+            if (g > 1.0f || g < 0.0f) {
+                increment_g = -increment_g;
             }
-            r += increment;
+            if (b > 1.0f || b < 0.0f) {
+                increment_b = -increment_b;
+            }
+            r += increment_r;
+            g += increment_g;
+            b += increment_b;
 
             // Swap front and back buffers
             glfwSwapBuffers(window);
