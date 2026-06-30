@@ -50,6 +50,9 @@ int main(void)
         return -1;
     }
     {
+        glm::vec3 cameraPos = glm::vec3(100, 0, 0);
+        glm::vec3 objectPos = glm::vec3(0, 0, 0);
+
         float vertexPositions[] = {
             -0.5f, -0.5f,   // 0
              0.5f, -0.5f,   // 1
@@ -70,10 +73,12 @@ int main(void)
         float circleCentreY = WINDOW_HEIGHT/2;
         const unsigned int numVerticiesPerCircle = 128;
         const float PI = 3.141592;
+        objectPos.x = circleCentreX;
+        objectPos.y = circleCentreY;
 
         // Plus one is for the centre and the two is for the two coordinates
         float circleVertexPositions[4 * (numVerticiesPerCircle + 1)] = {
-            circleCentreX, circleCentreY, 0.5, 0.5
+            0, 0, 0.5, 0.5
         };
         // 3 since there is a triangle for every vertex
         unsigned int circleIndicies[3 * numVerticiesPerCircle];
@@ -81,8 +86,8 @@ int main(void)
 
         for (int i = 0; i < numVerticiesPerCircle; i++) {
             // Add the vertex at the correct x and y pos
-            circleVertexPositions[4 * (i + 1)] = (circleRadius * cos(anglePerVertex * i)) + circleCentreX;
-            circleVertexPositions[4 * (i + 1) + 1] = (circleRadius * sin(anglePerVertex * i)) + circleCentreY;
+            circleVertexPositions[4 * (i + 1)] = (circleRadius * cos(anglePerVertex * i));
+            circleVertexPositions[4 * (i + 1) + 1] = (circleRadius * sin(anglePerVertex * i));
 
             // Add the texture coordinates (+ 1 then / 2 is to convert the range -1 to 1 to 0 to 1)
             circleVertexPositions[4 * (i + 1) + 2] = ((cos(anglePerVertex * i) + 1) / 2);
@@ -119,11 +124,15 @@ int main(void)
 
         // Create projection matrix
         glm::mat4 proj = glm::ortho(0.0f, WINDOW_WIDTH/WINDOW_SCALE_FACTOR, 0.0f, WINDOW_HEIGHT/WINDOW_SCALE_FACTOR, -1.0f, 1.0f);
+        glm::mat4 view = glm::translate(glm::mat4(1.0f), -cameraPos);
+        glm::mat4 model = glm::translate(glm::mat4(1.0f), objectPos);
+
+        glm::mat4 MVP = proj * view * model;
 
         Shader shader("res/shaders/basic.shader");
         shader.Bind();
         shader.SetUniform4f("u_Colour", 1.0f, 0.6f, 0.0f, 1.0f);
-        shader.SetUniformMat4f("u_MVP", proj);
+        shader.SetUniformMat4f("u_MVP", MVP);
 
         Texture texture("res/textures/AshensignWithBackground.png");
         texture.Bind(0);
