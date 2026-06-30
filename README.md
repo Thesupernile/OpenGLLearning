@@ -11,12 +11,11 @@ Screenshot shows the circle being correctly rendered and moved through the use o
 
 <video controls src="ScreenRecords/MovingCircle.mp4" title="Title"></video>
 
-# Legacy Screenshots:
-
 Screenshot below shows the textured circle being correctly rendered on a non square display. Achieved via the use of an orthographic projection matrix
 
 ![Screenshot showing Ashensign (current github profile picture as of writing)](Screenshots/AshensignWithProjectionMatrix.png)
 
+# Legacy Screenshots:
 
 Screenshot below shows my first textured object. The texture is rendered over a circle (although it's not obvious from the screenshot)
 
