@@ -146,6 +146,8 @@ int main(void)
         float increment_r = 0.05f;
         float increment_g = 0.07f;
         float increment_b = 0.03f;
+
+        float cameraPosIncrement = 2.0f;
         // Loop until the user closes the window
         while (!glfwWindowShouldClose(window))
         {
@@ -157,7 +159,10 @@ int main(void)
             //shader.SetUniform4f("u_Colour", r, g, b, 1.0f);
             //renderer.Draw(va, ib, shader);
 
+            view = glm::translate(glm::mat4(1.0f), -cameraPos);
+            glm::mat4 MVP = proj * view * model;
             shader.SetUniform4f("u_Colour", 0.0f, 0.0f, 0.0f, 0.0f);
+            shader.SetUniformMat4f("u_MVP", MVP);
             texture.Bind(0);
             renderer.Draw(va, ib, shader);
 
@@ -174,6 +179,13 @@ int main(void)
             r += increment_r;
             g += increment_g;
             b += increment_b;
+
+            // Movement code
+            if (cameraPos.x < -WINDOW_HEIGHT / 2 || cameraPos.x > WINDOW_HEIGHT / 2) {
+                cameraPosIncrement = -cameraPosIncrement;
+            }
+
+            cameraPos.x += cameraPosIncrement;
 
             // Swap front and back buffers
             glfwSwapBuffers(window);
