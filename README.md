@@ -7,15 +7,15 @@ Project is left in visual studio format since it's a learning project and not an
 
 # Current Screenshots:
 
-Screenshot shows the circle being correctly rendered and moved through the use of a view matrix
+Screenshot showing rendered circle as well as ImGui UI 
 
-<video controls src="ScreenRecords/MovingCircle.mp4" title="Title"></video>
+![Screenshot showing a fully rendered and textured circle in the top left and a GUI in the top right](Screenshots/AshensignWithImGui.png)
+
+# Legacy Screenshots:
 
 Screenshot below shows the textured circle being correctly rendered on a non square display. Achieved via the use of an orthographic projection matrix
 
 ![Screenshot showing Ashensign (current github profile picture as of writing)](Screenshots/AshensignWithProjectionMatrix.png)
-
-# Legacy Screenshots:
 
 Screenshot below shows my first textured object. The texture is rendered over a circle (although it's not obvious from the screenshot)
 

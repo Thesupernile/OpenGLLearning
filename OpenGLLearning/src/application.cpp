@@ -14,8 +14,14 @@
 #include "Shader.h"
 #include "Texture.h"
 
+// Include glm
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
+
+// Include ImGUI
+#include "imgui/imgui.h"
+#include "imgui/imgui_impl_glfw.h"
+#include "imgui/imgui_impl_opengl3.h"
 
 int main(void)
 {
@@ -131,8 +137,6 @@ int main(void)
 
         Shader shader("res/shaders/basic.shader");
         shader.Bind();
-        shader.SetUniform4f("u_Colour", 1.0f, 0.6f, 0.0f, 1.0f);
-        shader.SetUniformMat4f("u_MVP", MVP);
 
         Texture texture("res/textures/AshensignWithBackground.png");
         texture.Bind(0);
@@ -140,6 +144,20 @@ int main(void)
 
         Renderer renderer;
 
+        // Setup ImGUI
+        ImGui::CreateContext();
+        ImGui_ImplGlfw_InitForOpenGL(window, true);
+        ImGui_ImplOpenGL3_Init();
+        ImGui::StyleColorsDark();
+
+        ImGuiIO& io = ImGui::GetIO(); (void)io;
+        io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+        io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+
+        io.Fonts->AddFontDefault();
+        io.Fonts->Build();
+
+        // Colour and position change varaiables
         float r = 0.0f;
         float g = 0.5f;
         float b = 0.2f;
@@ -154,6 +172,11 @@ int main(void)
             // Render here 
             renderer.Clear();
 
+            // New ImGUI frame
+            ImGui_ImplOpenGL3_NewFrame();
+            ImGui_ImplGlfw_NewFrame();
+            ImGui::NewFrame();
+
             // Change colour
             //texture.Unbind();
             //shader.SetUniform4f("u_Colour", r, g, b, 1.0f);
@@ -161,6 +184,7 @@ int main(void)
 
             view = glm::translate(glm::mat4(1.0f), -cameraPos);
             glm::mat4 MVP = proj * view * model;
+
             shader.SetUniform4f("u_Colour", 0.0f, 0.0f, 0.0f, 0.0f);
             shader.SetUniformMat4f("u_MVP", MVP);
             texture.Bind(0);
@@ -181,11 +205,26 @@ int main(void)
             b += increment_b;
 
             // Movement code
-            if (cameraPos.x < -WINDOW_HEIGHT / 2 || cameraPos.x > WINDOW_HEIGHT / 2) {
-                cameraPosIncrement = -cameraPosIncrement;
-            }
+            //if (cameraPos.x < -WINDOW_HEIGHT / 2 || cameraPos.x > WINDOW_HEIGHT / 2) {
+            //    cameraPosIncrement = -cameraPosIncrement;
+            //}
 
-            cameraPos.x += cameraPosIncrement;
+            //cameraPos.x += cameraPosIncrement;
+
+            // ImGui window
+            static float f = 0.0f;
+            static int counter = 0;
+
+            ImGui::Begin("Control Pannel");                          
+
+            ImGui::SliderFloat2("Camera Position", &cameraPos.x, -WINDOW_WIDTH/2, WINDOW_WIDTH/2);
+
+            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
+            ImGui::End();
+
+
+            ImGui::Render();
+            ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
             // Swap front and back buffers
             glfwSwapBuffers(window);
@@ -195,6 +234,11 @@ int main(void)
         }
     }
 
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
+
     glfwTerminate();
+
     return 0;
 }
